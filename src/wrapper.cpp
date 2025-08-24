@@ -106,6 +106,63 @@ class TaylorSeriesAdaptive_wrapper
     }
 };
 
+class StationaryDistribution_wrapper
+{
+    private:
+    StationaryDistribution<double> sd;
+    
+    List dist_conversion(vector<Eigen::VectorXd> dist)
+    {
+        List res;
+        for(auto it = dist.begin(); it != dist.end(); it++){
+            res.push_back(*it);
+        }
+        return res;
+    }
+    
+    public:
+    StationaryDistribution_wrapper(QBD_wrappper proc)
+    {
+        sd.bind(proc.proc);
+    }
+
+    double get_rho()
+    {
+        return sd.get_rho();
+    }
+
+    Eigen::MatrixXd get_R()
+    {
+        return sd.get_R();
+    }
+
+    Eigen::MatrixXd get_G()
+    {
+        return sd.get_G();
+    }
+
+    List get_dist(unsigned int max_level)
+    {
+        vector<Eigen::VectorXd> dist;
+        dist = sd.get_dist(max_level);
+        return dist_conversion(dist);
+    }
+
+    List get_pi_0_c()
+    {
+        return dist_conversion(sd.get_pi_0_c());
+    }
+    
+    double get_mean_clients()
+    {
+        return sd.get_mean_clients();
+    }
+
+    Eigen::VectorXd get_sum_from_c_to_inf()
+    {
+        return sd.get_sum_from_c_to_inf();
+    }
+};
 
 
 RCPP_EXPOSED_CLASS(QBD_wrappper)
@@ -136,7 +193,18 @@ RCPP_MODULE(master){
     .method("get_dist", &TaylorSeriesAdaptive_wrapper::get_dist, "")
     ;
 
-    
+    class_<StationaryDistribution_wrapper>("StationaryDistribution")
+
+    .constructor<QBD_wrappper>()
+
+    .property("get_rho", &StationaryDistribution_wrapper::get_rho, "")
+    .property("get_R", &StationaryDistribution_wrapper::get_R, "")
+    .property("get_G", &StationaryDistribution_wrapper::get_G, "")
+    .property("get_pi_0_c", &StationaryDistribution_wrapper::get_pi_0_c, "")
+    .property("get_mean_clients", &StationaryDistribution_wrapper::get_mean_clients, "")
+    .property("get_sum_from_c_to_inf", &StationaryDistribution_wrapper::get_sum_from_c_to_inf, "")
+    .method("get_dist", &StationaryDistribution_wrapper::get_dist, "")
+    ;
 }
 
 
