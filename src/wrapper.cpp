@@ -9,9 +9,8 @@ using namespace std;
 
 class QBD_wrappper
 {
-    private:
-    QBD<double> proc;
     public:
+    QBD<double> proc;
 
     QBD_wrappper()
     {
@@ -55,6 +54,60 @@ class QBD_wrappper
 };
 
 
+class TaylorSeriesAdaptive_wrapper
+{
+    private:
+    TaylorSeriesAdaptive<double> series;
+
+    inline List dist_conversion(const vector<vector<Eigen::VectorXd>> &dist)
+    {
+        List res;
+        for(auto it = dist.begin(); it != dist.end(); it++){
+            List dist;
+            for(auto it_inner = it->begin(); it_inner != it->end(); it_inner++){
+                dist.push_back(*it_inner);
+            }
+            res.push_back(dist);
+        }
+        return res;
+    }
+    public:
+
+    TaylorSeriesAdaptive_wrapper(QBD_wrappper proc, List pi0, double error, double max_time)
+    {
+        std::vector<Eigen::VectorXd> pi0v;
+        for(unsigned long k = 0; k < pi0.size(); k++){
+            pi0v.push_back(pi0[k]);
+        }
+        series.bind(proc.proc,  pi0v, error, max_time);
+    }
+    
+    vector<double> get_reference_times()
+    {
+        return series.get_reference_times();
+    }
+
+    List get_reference_dists()
+    {
+        return dist_conversion(series.get_reference_dists());
+    }
+
+    List get_dist (vector<double> times)
+    {
+        vector<double> errors;
+        vector<vector<Eigen::VectorXd>> dist;
+        series.get_dist(dist, times, &errors);
+        return List::create(Named("errors") = errors, _["distribution"] = dist_conversion(dist));
+    }
+
+    vector<double> get_reference_mean_clients()
+    {
+        return series.get_reference_mean_clients();
+    }
+};
+
+
+
 RCPP_EXPOSED_CLASS(QBD_wrappper)
 
 RCPP_MODULE(master){
@@ -72,6 +125,18 @@ RCPP_MODULE(master){
     .method("add_final_level", &QBD_wrappper::add_final_level, "")
     .method("fix_diagonal", &QBD_wrappper::fix_diagonal, "")
     ;
+
+    class_<TaylorSeriesAdaptive_wrapper>("TaylorSeriesAdaptive")
+
+    .constructor<QBD_wrappper, List, double, double>()
+    
+    .property("get_reference_times", &TaylorSeriesAdaptive_wrapper::get_reference_times, "")
+    .property("get_reference_dists", &TaylorSeriesAdaptive_wrapper::get_reference_dists, "")
+    .property("get_reference_mean_clients", &TaylorSeriesAdaptive_wrapper::get_reference_mean_clients, "")
+    .method("get_dist", &TaylorSeriesAdaptive_wrapper::get_dist, "")
+    ;
+
+    
 }
 
 
