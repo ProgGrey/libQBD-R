@@ -1,0 +1,13 @@
+Package: libqbd
+Type: Package
+Title: Transient and stationary regimes of QBD processes.
+Version: 1.0.2.0
+Date: 2025-08-24
+Authors@R: person("Sergey", "Astafiev", role = c("aut", "cre"), email =
+        "seryymail@mail.ru")
+Description: Numerical solutions of stationary and transient regimes of Quasi-Birth-Death processes.
+License: BSD_3_clause + file LICENSE
+Imports: Rcpp (>= 1.1.0)
+LinkingTo: Rcpp, RcppEigen
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
