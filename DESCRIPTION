@@ -1,7 +1,7 @@
 Package: libqbd
 Type: Package
 Title: Transient and stationary regimes of QBD processes.
-Version: 1.0.2.0
+Version: 0.9.2.0
 Date: 2025-08-24
 Authors@R: person("Sergey", "Astafiev", role = c("aut", "cre"), email =
         "seryymail@mail.ru")
